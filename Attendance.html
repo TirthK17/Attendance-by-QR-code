@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rural School Attendance – Premium UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg: linear-gradient(135deg,#0b1220,#1c2233);
+  --card: rgba(19,27,46,0.72);
+  --muted:#8aa0c7;
+  --text:#eaf2ff;
+  --accent:#6ee7b7;
+  --accent2:#14b8a6;
+  --shadow:rgba(0,0,0,0.35);
+  --primary-grad: linear-gradient(135deg,#1fcd8a,#168565);
+}
+
+/* Base */
+*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+button{touch-action:manipulation}
+
+/* Particles canvas sits behind everything */
+canvas.particles{
+  position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;
+}
+
+/* Header */
+header{
+  position:relative;z-index:2;
+  background:rgba(11,18,32,0.86);
+  backdrop-filter:blur(10px);
+  padding:18px 20px;
+  box-shadow:0 6px 20px var(--shadow);
+  text-align:center;
+}
+header h1{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  font-size:34px;
+  font-weight:700;
+  background:linear-gradient(90deg,#6ee7b7,#14b8a6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  text-shadow:0 2px 8px rgba(0,0,0,0.45);
+  background-size:800px 100%;
+  animation:shimmer 6s linear infinite;
+}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+
+/* Layout */
+main{
+  position:relative;z-index:2;
+  max-width:1200px;margin:28px auto;padding:0 18px;
+  display:grid;grid-template-columns:360px 1fr;gap:24px;
+}
+
+/* Card */
+.card{
+  background:var(--card);
+  backdrop-filter:blur(8px);
+  border-radius:16px;padding:18px;
+  box-shadow:0 18px 40px var(--shadow);
+  transition:transform .28s ease,box-shadow .28s ease;
+}
+.card:hover{transform:translateY(-6px);box-shadow:0 26px 54px var(--shadow);}
+.card h2{margin:0 0 12px 0;font-size:18px;color:#dbe8ff;border-bottom:1px solid rgba(31,42,68,0.6);padding-bottom:10px;}
+
+/* Form elements */
+label{display:block;margin:10px 0 6px;color:var(--muted);font-size:13px;}
+input,select,button{width:100%;padding:11px 14px;border-radius:12px;border:none;background:#0d1425;color:var(--text);font-size:14px;}
+input[type="date"],select{cursor:pointer}
+button{font-weight:700}
+button.primary{background:var(--primary-grad);color:#fff;border:none;box-shadow:0 6px 18px rgba(16,185,145,0.06)}
+button.primary:active{transform:scale(.995)}
+button.ghost{background:transparent;border:1px solid rgba(39,50,79,0.6);color:#cfe0ff}
+
+/* Rows */
+.row{display:flex;gap:12px;margin-top:12px}
+.row > *{flex:1}
+
+/* Pills & stats */
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(27,41,70,0.65);font-size:13px;color:#cfe0ff;}
+.stats-row{display:flex;gap:12px;margin-top:10px}
+.stat-card{flex:1;background:rgba(27,41,70,0.66);padding:12px;border-radius:12px;text-align:center;box-shadow:0 8px 20px var(--shadow);transition:transform .25s}
+.stat-card:hover{transform:translateY(-4px)}
+.stat-card h3{margin:0;font-size:13px;color:var(--muted)}
+.stat-card p{margin:8px 0 0 0;font-size:18px;font-weight:700;color:#fff}
+
+/* Student list */
+.list{max-height:420px;overflow:auto;border-radius:12px;padding:10px;background:rgba(10,15,25,0.28);margin-top:8px}
+.item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;margin:8px 0;border-radius:12px;background:#11182755;
+  transition:all .32s cubic-bezier(.2,.9,.2,1);cursor:pointer;opacity:0;transform:translateY(8px);
+}
+.item.show{opacity:1;transform:translateY(0)}
+.item:hover{background:rgba(255,255,255,0.02)}
+.item.present{box-shadow:0 0 8px 2px rgba(110,231,183,0.12);border-left:4px solid var(--accent);background:rgba(16,185,145,0.04)}
+.avatar{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#fff;margin-right:12px;flex-shrink:0}
+.avatar.small{width:28px;height:28px;font-size:13px}
+
+/* Scan box */
+.scanbox{
+  aspect-ratio:4/3;background:linear-gradient(180deg,rgba(3,8,18,0.5),rgba(6,10,18,0.45));
+  border-radius:12px;border:3px solid rgba(255,255,255,0.02);display:grid;place-items:center;position:relative;overflow:hidden;
+}
+.scanbox.scanning{animation:borderGlow 3s linear infinite}
+@keyframes borderGlow{
+  0%{box-shadow:0 0 8px rgba(20,184,150,0.06);border-color:rgba(16,185,145,0.06)}
+  50%{box-shadow:0 0 18px rgba(20,184,150,0.1);border-color:rgba(16,185,145,0.12)}
+  100%{box-shadow:0 0 8px rgba(20,184,150,0.06);border-color:rgba(16,185,145,0.06)}
+}
+.scanline{position:absolute;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scanLine 1200ms linear infinite}
+@keyframes scanLine{0%{top:0}100%{top:100%}}
+.scanPlaceholder{color:rgba(207,224,255,0.35);font-size:14px;text-align:center;padding:12px}
+
+/* QR container */
+#qrContainer{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px}
+.qr-card{background:rgba(27,41,70,0.6);padding:10px;border-radius:12px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.4);border:1px solid rgba(16,185,145,0.06)}
+.qr-card canvas{display:block;margin:0 auto}
+
+/* Confetti */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:0;transition:opacity .3s}
+
+/* particles scroll bar */
+.list::-webkit-scrollbar{width:8px}
+.list::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:8px}
+.list::-webkit-scrollbar-track{background:rgba(27,41,70,0.12);border-radius:8px}
+
+/* Responsive */
+@media (max-width:900px){
+  main{grid-template-columns:1fr;padding:18px}
+  .row{flex-direction:column}
+  .scanbox{aspect-ratio:16/9}
+  .list{max-height:260px}
+  header h1{font-size:26px}
+}
+@media (max-width:420px){
+  header h1{font-size:20px}
+  .avatar{width:28px;height:28px}
+  .item{padding:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- Particles canvas -->
+<canvas class="particles" id="particlesCanvas"></canvas>
+
+<header>
+  <h1>🎓 Rural School Attendance</h1>
+</header>
+
+<main>
+  <!-- Left card -->
+  <section class="card">
+    <h2>1) School & Session</h2>
+
+    <label>School Name</label>
+    <input id="school" placeholder="Z.P. Primary School, Rampur">
+
+    <div class="row">
+      <div>
+        <label>Class</label>
+        <select id="klass"></select>
+      </div>
+      <div>
+        <label>Section</label>
+        <input id="section" placeholder="A/B/C">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Date</label>
+        <input type="date" id="date">
+      </div>
+      <div>
+        <label>Session</label>
+        <select id="session"><option>Morning</option><option>Afternoon</option><option>Full Day</option></select>
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="startBtn" class="primary">Start Attendance</button>
+      <button id="generateQRs" class="ghost">Generate QR Codes</button>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <button id="markAllPresent" class="ghost">Mark All Present</button>
+      <button id="markAllAbsent" class="ghost">Mark All Absent</button>
+      <button id="exportCSV" class="ghost">Export CSV</button>
+    </div>
+
+    <div id="qrContainer"></div>
+  </section>
+
+  <!-- Right card -->
+  <section class="card">
+    <h2>2) Scan QR / Mark Attendance</h2>
+
+    <div class="stats-row">
+      <div class="stat-card"><h3>Total Students</h3><p id="totalCount">0</p></div>
+      <div class="stat-card"><h3>Present</h3><p id="presentCount">0</p></div>
+      <div class="stat-card"><h3>Absent</h3><p id="absentCount">0</p></div>
+    </div>
+
+    <div class="row" style="margin-top:14px;">
+      <div>
+        <div class="scanbox" id="scanbox">
+          <div id="scanPlaceholder" class="scanPlaceholder">Camera preview will appear here</div>
+          <video id="video" class="hidden" autoplay playsinline muted></video>
+          <div class="scanline" id="scanline" style="display:none"></div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button id="scanBtn" class="primary">Start Camera</button>
+          <button id="stopBtn" class="ghost">Stop</button>
+        </div>
+      </div>
+
+      <div>
+        <label>Students</label>
+        <div class="list" id="studentList"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="confetti" id="confetti"></div>
+
+<!-- QR lib -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<script>
+/* ---------------------------
+   Data & element bindings
+   --------------------------- */
+const students = [
+  {id:'S001',name:'Ram Kumar',class:'1',section:'A'},
+  {id:'S002',name:'Sita Devi',class:'1',section:'A'},
+  {id:'S003',name:'Mohan Lal',class:'1',section:'A'},
+  {id:'S004',name:'Geeta Sharma',class:'1',section:'B'},
+  {id:'S005',name:'Ravi Patel',class:'1',section:'B'},
+  {id:'S006',name:'Anita Singh',class:'1',section:'B'},
+  {id:'S007',name:'Vikram Joshi',class:'1',section:'A'}
+];
+
+const klass = document.getElementById('klass');
+['1','2','3','4','5'].forEach(c => klass.add(new Option(c,c)));
+const sectionEl = document.getElementById('section');
+const dateInput = document.getElementById('date');
+const startBtn = document.getElementById('startBtn');
+const generateQRsBtn = document.getElementById('generateQRs');
+const studentList = document.getElementById('studentList');
+const totalCount = document.getElementById('totalCount');
+const presentCount = document.getElementById('presentCount');
+const absentCount = document.getElementById('absentCount');
+const scanBtn = document.getElementById('scanBtn');
+const stopBtn = document.getElementById('stopBtn');
+const video = document.getElementById('video');
+const scanPlaceholder = document.getElementById('scanPlaceholder');
+const scanbox = document.getElementById('scanbox');
+const scanline = document.getElementById('scanline');
+const qrContainer = document.getElementById('qrContainer');
+const markAllPresentBtn = document.getElementById('markAllPresent');
+const markAllAbsentBtn = document.getElementById('markAllAbsent');
+const exportCSVBtn = document.getElementById('exportCSV');
+const confettiEl = document.getElementById('confetti');
+
+let currentStudents = [];
+let attendanceMap = {};
+let videoStream = null;
+let scanning = false;
+let qrDetected = false; // prevents multiple marks while same QR stays in view
+
+// small hidden canvas for frame analysis
+const analysisCanvas = document.createElement('canvas');
+const analysisCtx = analysisCanvas.getContext('2d');
+
+/* ---------------------------
+   Utility: render student list
+   --------------------------- */
+function initials(name){
+  return name.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
+}
+function renderStudentList(){
+  studentList.innerHTML = '';
+  currentStudents.forEach((s,i) => {
+    const item = document.createElement('div');
+    item.className = 'item' + (attendanceMap[s.id] ? ' present' : '');
+    item.style.transitionDelay = (i*35) + 'ms';
+    // avatar, name, checkbox
+    const left = document.createElement('div');
+    left.style.display = 'flex';
+    left.style.alignItems = 'center';
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar' + (window.innerWidth < 420 ? ' small' : '');
+    // color based on id to vary avatars
+    const hue = 140 + (parseInt(s.id.replace(/\D/g,''),10) * 37) % 120;
+    avatar.style.background = `linear-gradient(135deg,hsl(${hue}deg 70% 45%), hsl(${(hue+30)%360}deg 60% 40%))`;
+    avatar.textContent = initials(s.name);
+    left.appendChild(avatar);
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = s.name;
+    left.appendChild(nameSpan);
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = !!attendanceMap[s.id];
+    checkbox.addEventListener('change', (e) => {
+      attendanceMap[s.id] = !!e.target.checked;
+      updateCounts();
+      // animate via re-render
+      renderStudentList();
+    });
+
+    item.appendChild(left);
+    item.appendChild(checkbox);
+
+    studentList.appendChild(item);
+    // trigger show animation
+    setTimeout(()=>item.classList.add('show'), 30);
+  });
+  updateCounts();
+}
+
+/* ---------------------------
+   counts & confetti
+   --------------------------- */
+function updateCounts(){
+  totalCount.textContent = currentStudents.length;
+  const present = Object.values(attendanceMap).filter(v=>v).length;
+  presentCount.textContent = present;
+  absentCount.textContent = (currentStudents.length - present);
+  if(present === currentStudents.length && currentStudents.length > 0){
+    // show confetti briefly
+    confettiEl.style.opacity = '1';
+    setTimeout(()=> confettiEl.style.opacity = '0', 1400);
+  }
+}
+
+/* ---------------------------
+   Start session
+   --------------------------- */
+startBtn.addEventListener('click', ()=>{
+  const cls = klass.value, sec = sectionEl.value, dt = dateInput.value;
+  if(!cls || !sec || !dt){ alert('Select Class, Section, Date'); return; }
+  currentStudents = students.filter(s => s.class === cls && s.section === sec);
+  attendanceMap = {};
+  currentStudents.forEach(s => attendanceMap[s.id] = false);
+  renderStudentList();
+});
+
+/* ---------------------------
+   QR generation
+   --------------------------- */
+generateQRsBtn.addEventListener('click', async ()=>{
+  qrContainer.innerHTML = '';
+  for(const s of currentStudents){
+    const div = document.createElement('div');
+    div.className = 'qr-card';
+    const canvas = document.createElement('canvas');
+    await QRCode.toCanvas(canvas, s.id, {width: 110, margin:1});
+    const label = document.createElement('div');
+    label.style.marginTop = '8px'; label.style.color = '#cfe0ff';
+    label.textContent = `${s.name} (${s.id})`;
+    div.appendChild(canvas); div.appendChild(label);
+    qrContainer.appendChild(div);
+  }
+});
+
+/* ---------------------------
+   Mark all / absent / CSV
+   --------------------------- */
+markAllPresentBtn.addEventListener('click', ()=>{
+  currentStudents.forEach(s => attendanceMap[s.id] = true); renderStudentList();
+});
+markAllAbsentBtn.addEventListener('click', ()=>{
+  currentStudents.forEach(s => attendanceMap[s.id] = false); renderStudentList();
+});
+exportCSVBtn.addEventListener('click', ()=>{
+  let csv = 'ID,Name,Class,Section,Present\n';
+  currentStudents.forEach(s => {
+    csv += `${s.id},${s.name},${s.class},${s.section},${attendanceMap[s.id] ? 1 : 0}\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'attendance.csv'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ---------------------------
+   Camera + fake QR detection
+   - uses light/dark pixel ratio heuristic
+   - marks one student per QR appearance (qrDetected flag)
+   --------------------------- */
+
+async function startCamera(){
+  // prefer rear camera on mobile, request reasonable resolution
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+  } catch (err) {
+    alert('Camera access denied or unsupported: ' + err.message);
+    return;
+  }
+  video.srcObject = videoStream;
+  video.classList.remove('hidden');
+  scanPlaceholder.style.display = 'none';
+  scanline.style.display = 'block';
+  scanbox.classList.add('scanning');
+  scanning = true;
+  qrDetected = false;
+  // start analysis loop
+  requestAnimationFrame(scanFrame);
+}
+
+function stopCamera(){
+  scanning = false;
+  if(videoStream){
+    videoStream.getTracks().forEach(t=>t.stop());
+    videoStream = null;
+  }
+  video.classList.add('hidden');
+  scanPlaceholder.style.display = 'block';
+  scanline.style.display = 'none';
+  scanbox.classList.remove('scanning');
+  qrDetected = false;
+}
+
+scanBtn.addEventListener('click', startCamera);
+stopBtn.addEventListener('click', stopCamera);
+
+function scanFrame(){
+  if(!scanning) return;
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    // draw a small scaled frame for analysis to save CPU
+    const W = 240; // analysis width
+    const H = Math.round(W * (video.videoHeight / video.videoWidth));
+    analysisCanvas.width = W;
+    analysisCanvas.height = H;
+    analysisCtx.drawImage(video, 0, 0, W, H);
+    const frame = analysisCtx.getImageData(0,0,W,H);
+    // compute dark & light counts
+    let dark=0, light=0, total = 0;
+    const step = 4 * 4; // sample every 4 pixels for speed
+    for(let i=0;i<frame.data.length;i+=step){
+      const r = frame.data[i], g = frame.data[i+1], b = frame.data[i+2];
+      const avg = (r+g+b)/3;
+      if(avg < 60) dark++;
+      else if(avg > 200) light++;
+      total++;
+    }
+    const ratio = (dark + light) ? (dark / (dark + light)) : 0;
+    // heuristics: QR-like has mix of dark and light -> ratio between ~0.25 and 0.75
+    const detected = ratio > 0.22 && ratio < 0.78 && (dark + light) > 20;
+    if(detected && !qrDetected){
+      // mark exactly one absent student
+      const absent = currentStudents.filter(s => !attendanceMap[s.id]);
+      if(absent.length > 0){
+        const student = absent[Math.floor(Math.random()*absent.length)];
+        attendanceMap[student.id] = true;
+        renderStudentList();
+      }
+      qrDetected = true;
+    }
+    // reset qrDetected when QR-like disappears
+    if(!detected) qrDetected = false;
+  }
+  requestAnimationFrame(scanFrame);
+}
+
+/* ---------------------------
+   Particles background (subtle)
+   --------------------------- */
+const canvas = document.getElementById('particlesCanvas');
+const ctx = canvas.getContext('2d');
+let DPR = Math.max(1, window.devicePixelRatio || 1);
+function resizeParticles(){
+  DPR = Math.max(1, window.devicePixelRatio || 1);
+  canvas.width = Math.floor(window.innerWidth * DPR);
+  canvas.height = Math.floor(window.innerHeight * DPR);
+  canvas.style.width = window.innerWidth + 'px';
+  canvas.style.height = window.innerHeight + 'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', ()=>{ resizeParticles(); initParticles(); });
+
+// create small drifting shapes
+let particles = [];
+function initParticles(){
+  particles = [];
+  const count = Math.round(Math.min(160, window.innerWidth * 0.12));
+  for(let i=0;i<count;i++){
+    particles.push({
+      x: Math.random()*window.innerWidth,
+      y: Math.random()*window.innerHeight,
+      r: Math.random()*2.2 + 0.6,
+      vx: (Math.random()-0.5)*0.15,
+      vy: - (Math.random()*0.3 + 0.05),
+      life: Math.random()*100 + 60,
+      alpha: Math.random()*0.25 + 0.06
+    });
+  }
+}
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width/DPR,canvas.height/DPR);
+  particles.forEach(p=>{
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+    if(p.y < -10 || p.life < 0){
+      p.x = Math.random()*window.innerWidth;
+      p.y = window.innerHeight + 10;
+      p.vx = (Math.random()-0.5)*0.15;
+      p.vy = - (Math.random()*0.3 + 0.05);
+      p.life = Math.random()*120 + 40;
+      p.alpha = Math.random()*0.25 + 0.06;
+      p.r = Math.random()*2.2 + 0.6;
+    }
+    // subtle blurred dot
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(30,255,200,${p.alpha})`;
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fill();
+  });
+  requestAnimationFrame(animateParticles);
+}
+resizeParticles();
+initParticles();
+animateParticles();
+
+/* ---------------------------
+   Initial state: choose default date
+   --------------------------- */
+dateInput.valueAsDate = new Date();
+
+/* ---------------------------
+   Small UX: reset qrDetected when user taps scanbox (so they can re-scan)
+   --------------------------- */
+scanbox.addEventListener('click', ()=>{ qrDetected = false; });
+
+/* ---------------------------
+   Make enter key start for convenience
+   --------------------------- */
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){
+    if(document.activeElement === dateInput || document.activeElement === sectionEl || document.activeElement === klass){
+      startBtn.click();
+    }
+  }
+});
+</script>
+</body>
+</html>
